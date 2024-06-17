@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Image</title>
+</head>
+<body>
+    <h1>Text to Image Generator</h1>
+    <form id="text-to-image-form">
+        <label for="prompt">Enter your prompt:</label>
+        <input type="text" id="prompt" name="prompt" required>
+        <button type="submit">Generate Image</button>
+    </form>
+    <div id="result-container" style="display:none;">
+        <h2>Generated Image:</h2>
+        <img id="result" src="" alt="Generated Image">
+    </div>
+    <div id="error-container" style="display:none; color: red;">
+        <h2>Error:</h2>
+        <p id="error-message"></p>
+    </div>
+    <script>
+        document.querySelector('#text-to-image-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const prompt = document.querySelector('#prompt').value;
+            const response = await fetch('/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `prompt=${encodeURIComponent(prompt)}`
+            });
+
+            if (response.ok) {
+                const imageURL = URL.createObjectURL(await response.blob());
+                document.querySelector('#result').src = imageURL;
+                document.querySelector('#result-container').style.display = 'block';
+                document.querySelector('#error-container').style.display = 'none';
+            } else {
+                const errorData = await response.json();
+                document.querySelector('#error-message').textContent = errorData.error;
+                document.querySelector('#error-container').style.display = 'block';
+                document.querySelector('#result-container').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
